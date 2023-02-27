@@ -15,7 +15,7 @@ void validate_alpha(string& str, int n);
 int num_of_variables(string str);
 string reading_func();
 void print_variable_set(string str);
-void dec_to_binary(int n, string str);
+vector<char> dec_to_binary(int n, string str);
 void generate_truth_table(int num, string str);
 
 
@@ -89,7 +89,7 @@ void print_variable_set(string str)            //will probably use to print out 
    
 }
 
-void dec_to_binary(int n, string str)
+vector<char> dec_to_binary(int n, string str)
 {
     
     vector <char> binary;
@@ -107,12 +107,7 @@ void dec_to_binary(int n, string str)
         }
 
     }
-    cout << endl;
-    for (int i = 0; i < binary.size(); i++)
-      
-           {
-               cout << binary[i]<<" ";
-            }
+    return binary;
 }
 
 
@@ -122,12 +117,17 @@ void generate_truth_table(int num, string str)
     cout << str;
     int rows = pow(2, num_of_variables(str));
     int cols = num_of_variables(str) + 1;
-  //  cout << endl;
+    vector<char> bin;
+    cout << endl;
     for (int i = 0; i < rows; i++)
     {
-        {                                                                                                                                                                                                                                                                                                                                                                  
-            dec_to_binary(i,str);
+        bin = dec_to_binary(i, str);
+        for (int i = 0; i < bin.size(); i++)
+
+        {
+            cout << bin[i] << " ";
         }
+        cout << endl;
     }
 }
 
