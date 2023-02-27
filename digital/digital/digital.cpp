@@ -39,17 +39,19 @@ void validate_alpha(string &str, int n)                    // validating the SoP
                 SOP = true;
             else if (str[i + 1] == '\'')
                 SOP = true;
-          
             else
             {
-                SOP;
+                SOP=false;
                 break;
             }
+
         }
         else
+        {
             SOP;
+        }  
     }
-    if (SOP==true)
+    if (SOP == true)
         cout << "SoP format" << endl;
     else
     {
@@ -140,8 +142,7 @@ int main()
     string func;
     func = reading_func();      //testing function
     int num = num_of_variables(func);     // testing function
-    //cout << endl;
-   // print_variable_set(func);         //testing function
+
     cout << endl;
    
     generate_truth_table(num,func);     //test
