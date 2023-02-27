@@ -14,7 +14,8 @@ using namespace std;
 void validate_alpha(string& str, int n);
 int num_of_variables(string str);
 string reading_func();
-
+void print_variable_set(string str);
+void generate_truth_table(int num, string str);
 
 
 void validate_alpha(string &str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
@@ -87,11 +88,39 @@ void print_variable_set(string str)            //will probably use to print out 
     }
     for (auto it = variable.begin(); it != variable.end(); ++it)
         cout << *it<<' ';
+   
 }
 
 
-void generate_truth_table(int num)
+void generate_truth_table(int num, string str)    //not sure of function tbh needs to be revisited
 {
+    print_variable_set(str);
+    cout << str;
+    int rows = pow(2, num_of_variables(str));
+    int cols = num_of_variables(str) + 1;
+    cout << endl;
+    
+    vector<vector<int>> vec(rows, vector<int>(cols));                          //i think in general we can use 2d vectors to print truth table but need to figure out how to input the values
+
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            vec[i][j] = 0;
+          
+        }
+    }
+
+    // for loop to run through the variables m to n  
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            cout << vec[i][j] << " ";
+        }
+
+        cout << endl;
+    }
 
 }
 
@@ -100,8 +129,10 @@ int main()
 {
     string func;
     func = reading_func();      //testing function
-    cout << num_of_variables(func);     // testing function
+    int num = num_of_variables(func);     // testing function
     cout << endl;
-    print_variable_set(func);         //testung function
+   // print_variable_set(func);         //testing function
+    cout << endl;
+    generate_truth_table(num,func);     //test
 }
 
