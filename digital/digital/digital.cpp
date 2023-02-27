@@ -15,6 +15,7 @@ void validate_alpha(string& str, int n);
 int num_of_variables(string str);
 string reading_func();
 void print_variable_set(string str);
+void dec_to_binary(int n, string str);
 void generate_truth_table(int num, string str);
 
 
@@ -91,37 +92,46 @@ void print_variable_set(string str)            //will probably use to print out 
    
 }
 
+void dec_to_binary(int n, string str)
+{
+    
+    vector <char> binary;
+    int rows = pow(2, num_of_variables(str));
+    int cols = num_of_variables(str) + 1;
+    for (int i = cols-2; i >= 0; i--) {
+        int k = n >> i;
+        if (k & 1)
+        {
+            binary.push_back('1');
+        }
+        else 
+        {
+            binary.push_back('0');
+        }
 
-void generate_truth_table(int num, string str)    //not sure of function tbh needs to be revisited
+    }
+    cout << endl;
+    for (int i = 0; i < binary.size(); i++)
+      
+           {
+               cout << binary[i]<<" ";
+            }
+}
+
+
+void generate_truth_table(int num, string str)   
 {
     print_variable_set(str);
     cout << str;
     int rows = pow(2, num_of_variables(str));
     int cols = num_of_variables(str) + 1;
-    cout << endl;
-    
-    vector<vector<int>> vec(rows, vector<int>(cols));                          //i think in general we can use 2d vectors to print truth table but need to figure out how to input the values
-
+  //  cout << endl;
     for (int i = 0; i < rows; i++)
     {
-        for (int j = 0; j < cols; j++)
-        {
-            vec[i][j] = 0;
-          
+        {                                                                                                                                                                                                                                                                                                                                                                  
+            dec_to_binary(i,str);
         }
     }
-
-    // for loop to run through the variables m to n  
-    for (int i = 0; i < rows; i++)
-    {
-        for (int j = 0; j < cols; j++)
-        {
-            cout << vec[i][j] << " ";
-        }
-
-        cout << endl;
-    }
-
 }
 
 
@@ -130,9 +140,11 @@ int main()
     string func;
     func = reading_func();      //testing function
     int num = num_of_variables(func);     // testing function
-    cout << endl;
+    //cout << endl;
    // print_variable_set(func);         //testing function
     cout << endl;
+   
     generate_truth_table(num,func);     //test
+  
 }
 

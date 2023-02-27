@@ -1,5 +1,7 @@
 ﻿  digital.cpp
-C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(73,27): warning C4018: '<': signed/unsigned mismatch
-C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(84,23): warning C4018: '<': signed/unsigned mismatch
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(74,27): warning C4018: '<': signed/unsigned mismatch
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(85,23): warning C4018: '<': signed/unsigned mismatch
 C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(99,14): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(114,23): warning C4018: '<': signed/unsigned mismatch
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(126,14): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
   digital.vcxproj -> C:\Digital-Design-1-Project-1\digital\Debug\digital.exe
