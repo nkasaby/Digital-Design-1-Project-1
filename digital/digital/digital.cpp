@@ -8,9 +8,13 @@
 #include <vector>
 #include <string>
 #include<ctype.h>
+#include <unordered_set>
 using namespace std;
 
-void reading_func();
+void validate_alpha(string& str, int n);
+int num_of_variables(string str);
+string reading_func();
+
 
 
 void validate_alpha(string &str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
@@ -21,7 +25,7 @@ void validate_alpha(string &str, int n)                    // validating the SoP
         {
             if (isalpha(str[i + 1]))
             {
-                if (str.size()<=10)
+                if (num_of_variables(str) <=10)
                      SOP = true;
                 else
                 {
@@ -52,17 +56,34 @@ void validate_alpha(string &str, int n)                    // validating the SoP
     }
 }
 
-void reading_func()                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
+string reading_func()                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
 {
     string func;
-    cout << "Please enter a functio as SoP with a maximum of 10 variables." << endl;
+    cout << "Please enter a function as SoP with a maximum of 10 variables." << endl;
     cin >> func;
     int n = func.size();
     validate_alpha(func, n);
+    return func;
 }
+
+int num_of_variables(string str)
+{
+        unordered_set<char> variable;              //using an unordered set to store unique letters, this will help us know how many vairables we have in the function
+        for (int i = 0; i < str.size(); i++)
+        {
+           if (isalpha(str[i]))               //inserting characters into the set only if they are letters (not + or ')
+              variable.insert(str[i]);
+        }
+        return variable.size();
+}
+
 
 int main()
 {
-    reading_func();
+    string func;
+    func = reading_func();      //testing function
+    cout << endl;
+    cout << num_of_variables(func);     // testing function
+   // cout << func;
 }
 
