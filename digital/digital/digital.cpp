@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include<ctype.h>
+#include <ctype.h>
 #include <unordered_set>
 using namespace std;
 
@@ -77,13 +77,31 @@ int num_of_variables(string str)
         return variable.size();
 }
 
+void print_variable_set(string str)            //will probably use to print out the truth tables
+{
+    unordered_set<char> variable;              
+    for (int i = 0; i < str.size(); i++)
+    {
+        if (isalpha(str[i]))               
+            variable.insert(str[i]);
+    }
+    for (auto it = variable.begin(); it != variable.end(); ++it)
+        cout << *it<<' ';
+}
+
+
+void generate_truth_table(int num)
+{
+
+}
+
 
 int main()
 {
     string func;
     func = reading_func();      //testing function
-    cout << endl;
     cout << num_of_variables(func);     // testing function
-   // cout << func;
+    cout << endl;
+    print_variable_set(func);         //testung function
 }
 
