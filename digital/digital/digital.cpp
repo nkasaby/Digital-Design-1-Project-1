@@ -19,37 +19,31 @@ void dec_to_binary(int n, string str);
 void generate_truth_table(int num, string str);
 
 
-void validate_alpha(string &str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
-{                                                         
-    bool SOP = false;                                     // ** need to make sure that func doesnt have ' before a letter or end with a +
+void validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
+{
+    bool SOP = true;                                     // ** need to make sure that func doesnt have ' before a letter or end with a +
     for (int i = 0; i < n; i++) {
-        if (isalpha(str[0]))
+        if (!isalpha(str[0])) {
+            SOP = false;
+            break;
+        }
+       
+        if (isalpha(str[i]))
         {
-            if (isalpha(str[i + 1]))
-            {
-                if (num_of_variables(str) <=10)
-                     SOP = true;
-                else
-                {
-                    cout << "Invalid. Maximum number of vairables is 10. Please enter a new function." << endl;
-                    reading_func();
-                }
-            }
-            else if (str[i + 1] == '+')
-                SOP = true;
-            else if (str[i + 1] == '\'')
-                SOP = true;
-            else
-            {
-                SOP=false;
-                break;
+            if (num_of_variables(str) > 10) {
+                SOP = false;
+
+                cout << "Invalid. Maximum number of vairables is 10. Please enter a new function." << endl;
+                reading_func();
             }
 
         }
-        else
-        {
-            SOP;
-        }  
+        else if (str[i] != '+' && str[i] != '\'') {
+            SOP = false;
+            break;
+        }
+           
+        
     }
     if (SOP == true)
         cout << "SoP format" << endl;
@@ -59,6 +53,7 @@ void validate_alpha(string &str, int n)                    // validating the SoP
         reading_func();
     }
 }
+
 
 string reading_func()                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
 {
