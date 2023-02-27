@@ -2,7 +2,7 @@
 // DigitaL Design 1 Project 1 : Quine-McCluskey Logic Minimization
 // Nour Kasaby 900211955
 // Nadine Safwat 900
-// Mariam Elghobary 900
+// Mariam Elghobary 900211608
 
 #include <iostream>
 #include <vector>
