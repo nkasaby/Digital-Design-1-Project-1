@@ -27,7 +27,7 @@ void validate_alpha(string& str, int n)                    // validating the SoP
             SOP = false;
             break;
         }
-       
+
         if (isalpha(str[i]))
         {
             if (num_of_variables(str) > 10) {
@@ -42,8 +42,8 @@ void validate_alpha(string& str, int n)                    // validating the SoP
             SOP = false;
             break;
         }
-           
-        
+
+
     }
     if (SOP == true)
         cout << "SoP format" << endl;
@@ -67,41 +67,41 @@ string reading_func()                            //very basic function that take
 
 int num_of_variables(string str)
 {
-        unordered_set<char> variable;              //using an unordered set to store unique letters, this will help us know how many vairables we have in the function
-        for (int i = 0; i < str.size(); i++)
-        {
-           if (isalpha(str[i]))               //inserting characters into the set only if they are letters (not + or ')
-              variable.insert(str[i]);
-        }
-        return variable.size();
+    unordered_set<char> variable;              //using an unordered set to store unique letters, this will help us know how many vairables we have in the function
+    for (int i = 0; i < str.size(); i++)
+    {
+        if (isalpha(str[i]))               //inserting characters into the set only if they are letters (not + or ')
+            variable.insert(str[i]);
+    }
+    return variable.size();
 }
 
 void print_variable_set(string str)            //will probably use to print out the truth tables
 {
-    unordered_set<char> variable;              
+    unordered_set<char> variable;
     for (int i = 0; i < str.size(); i++)
     {
-        if (isalpha(str[i]))               
+        if (isalpha(str[i]))
             variable.insert(str[i]);
     }
     for (auto it = variable.begin(); it != variable.end(); ++it)
-        cout << *it<<' ';
-   
+        cout << *it << ' ';
+
 }
 
 vector<char> dec_to_binary(int n, string str)
 {
-    
+
     vector <char> binary;
     int rows = pow(2, num_of_variables(str));
     int cols = num_of_variables(str) + 1;
-    for (int i = cols-2; i >= 0; i--) {
+    for (int i = cols - 2; i >= 0; i--) {
         int k = n >> i;
         if (k & 1)
         {
             binary.push_back('1');
         }
-        else 
+        else
         {
             binary.push_back('0');
         }
@@ -110,22 +110,87 @@ vector<char> dec_to_binary(int n, string str)
     return binary;
 }
 
+vector<int> Get_Minterms(string str, int num_of_variables) {
+    string term = "";
+    vector<string> terms_vec;
+    for (int i = 0; i < str.size(); i++) {
+        if (str[i] != '+')
+            term += str[i];
+        else {
+            terms_vec.push_back(term);
+            term = "";
+        }
 
-void generate_truth_table(int num, string str)   
+    }
+    terms_vec.push_back(term);
+    /* cout << "each term: " << endl;
+     for (int i = 0; i < terms_vec.size(); i++) {
+         cout << terms_vec[i] << endl;
+     }
+     */
+    vector<int> Minterms;
+    int sum, count;
+    for (int i = 0; i < terms_vec.size(); i++) {
+        sum = 0;
+        count = 0;
+        for (int j = 0; j < terms_vec[i].size(); j++) {
+
+            if (terms_vec[i][j + 1] == '\'')
+                j++;
+            else
+                sum += pow(2, num_of_variables - count - 1);
+            count++;
+
+
+        }
+        Minterms.push_back(sum);
+    }
+    /*
+    cout << "Minterms: " << endl;
+  for (int i = 0; i < Minterms.size(); i++) {
+      cout << Minterms[i] << endl;
+  }
+  */
+
+    return Minterms;
+}
+
+
+
+void generate_TT(int num, string str)
 {
     print_variable_set(str);
     cout << str;
     int rows = pow(2, num_of_variables(str));
     int cols = num_of_variables(str) + 1;
+    vector < vector<char>> TT(rows);
     vector<char> bin;
+
+    vector<int>M;
     cout << endl;
+    //Obtaining Minterms 
+    M = Get_Minterms(str, num);
+
+
     for (int i = 0; i < rows; i++)
     {
         bin = dec_to_binary(i, str);
-        for (int i = 0; i < bin.size(); i++)
+        for (int j = 0; j < cols; j++)
 
         {
-            cout << bin[i] << " ";
+            if (j == cols - 1) {
+
+                if (find(M.begin(), M.end(), i) != M.end()) {
+                    TT[i].push_back('1');
+                }
+
+                else
+                    TT[i].push_back('0');
+            }
+            else
+                TT[i].push_back(bin[j]);
+
+            cout << TT[i][j] << " ";
         }
         cout << endl;
     }
@@ -139,8 +204,10 @@ int main()
     int num = num_of_variables(func);     // testing function
 
     cout << endl;
-   
-    generate_truth_table(num,func);     //test
-  
+
+    generate_TT(num, func);     //test
+    Get_Minterms(func, num);
+
 }
+
 
