@@ -255,7 +255,8 @@ void QMStep1(vector<string> minterms) {
 
     cout << "QM STEP 1 TEST: \n";
 
-    vector<int> numOfOnes (minterms.size());
+    vector<int> numOfOnes(minterms.size());
+    map<int, vector<string>> groups;
 
     for (int i = 0; i < minterms.size(); i++) {
         int count = 0;
@@ -266,7 +267,7 @@ void QMStep1(vector<string> minterms) {
         numOfOnes[i] = count;
     }
 
-    cout << endl; 
+    cout << endl;
 
     for (int k = 0; k < numOfOnes.size() - 1; k++)
     {
@@ -283,6 +284,25 @@ void QMStep1(vector<string> minterms) {
     }
 
     cout << "\n QM STEP 1 TEST END \n";
+
+
+
+    for (int i = 0; i < numOfOnes.size(); i++)
+    {
+        groups[numOfOnes[i]].push_back(minterms[i]);
+    }
+
+    for (auto i : groups)
+    {
+        cout << i.first << "->";
+        for (auto j : i.second)
+            cout << j << " ";
+        cout << endl;
+    }
+
+
+
+    // cout << minterms[1] << endl << minterms[2] << endl;
 }
 
 //map<char, vector<char>> generate_map()
