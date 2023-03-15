@@ -1,6 +1,10 @@
 ﻿  digital.cpp
-C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(63,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(76,31): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
-C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(96,14): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(118,14): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(64,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(97,14): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(98,41): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(144,70): warning C4244: '+=': conversion from 'double' to 'int', possible loss of data
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(133,14): warning C4101: 'count': unreferenced local variable
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(167,14): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(168,41): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Digital-Design-1-Project-1\digital\digital\digital.cpp(211,37): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   digital.vcxproj -> C:\Digital-Design-1-Project-1\digital\x64\Debug\digital.exe

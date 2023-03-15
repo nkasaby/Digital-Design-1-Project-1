@@ -8,15 +8,16 @@
 #include <vector>
 #include <string>
 #include <ctype.h>
-#include <unordered_set>
+#include <set>
+#include <map>
 using namespace std;
 
 void validate_alpha(string& str, int n);
-int num_of_variables(string str);
+set<char> variables(string str);
 string reading_func();
 void print_variable_set(string str);
 vector<char> dec_to_binary(int n, string str);
-void generate_truth_table(int num, string str);
+void generate_TT(int num, string str);
 
 
 void validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
@@ -30,7 +31,7 @@ void validate_alpha(string& str, int n)                    // validating the SoP
 
         if (isalpha(str[i]))
         {
-            if (num_of_variables(str) > 10) {
+            if (variables(str).size() > 10) {
                 SOP = false;
 
                 cout << "Invalid. Maximum number of vairables is 10. Please enter a new function." << endl;
@@ -65,20 +66,20 @@ string reading_func()                            //very basic function that take
     return func;
 }
 
-int num_of_variables(string str)
+set<char> variables(string str)
 {
-    unordered_set<char> variable;              //using an unordered set to store unique letters, this will help us know how many vairables we have in the function
+    set<char> variable;              //using an unordered set to store unique letters, this will help us know how many vairables we have in the function
     for (int i = 0; i < str.size(); i++)
     {
         if (isalpha(str[i]))               //inserting characters into the set only if they are letters (not + or ')
             variable.insert(str[i]);
     }
-    return variable.size();
+    return variable;
 }
 
 void print_variable_set(string str)            //will probably use to print out the truth tables
 {
-    unordered_set<char> variable;
+    set<char> variable;
     for (int i = 0; i < str.size(); i++)
     {
         if (isalpha(str[i]))
@@ -93,8 +94,8 @@ vector<char> dec_to_binary(int n, string str)
 {
 
     vector <char> binary;
-    int rows = pow(2, num_of_variables(str));
-    int cols = num_of_variables(str) + 1;
+    int rows = pow(2, variables(str).size());
+    int cols = variables(str).size() + 1;
     for (int i = cols - 2; i >= 0; i--) {
         int k = n >> i;
         if (k & 1)
@@ -132,14 +133,16 @@ vector<int> Get_Minterms(string str, int num_of_variables) {
     int sum, count;
     for (int i = 0; i < terms_vec.size(); i++) {
         sum = 0;
-        count = 0;
+
         for (int j = 0; j < terms_vec[i].size(); j++) {
 
             if (terms_vec[i][j + 1] == '\'')
                 j++;
             else
-                sum += pow(2, num_of_variables - count - 1);
-            count++;
+            {
+                char x = terms_vec[i][j];
+                sum += pow(2, (num_of_variables - (int(x) - 97) - 1));
+            }   //mariam did this
 
 
         }
@@ -161,8 +164,8 @@ void generate_TT(int num, string str)
 {
     print_variable_set(str);
     cout << str;
-    int rows = pow(2, num_of_variables(str));
-    int cols = num_of_variables(str) + 1;
+    int rows = pow(2, variables(str).size());
+    int cols = variables(str).size() + 1;
     vector < vector<char>> TT(rows);
     vector<char> bin;
 
@@ -196,12 +199,16 @@ void generate_TT(int num, string str)
     }
 }
 
+//map<char, vector<char>> generate_map()
+//{
+//
+//}
 
 int main()
 {
     string func;
     func = reading_func();      //testing function
-    int num = num_of_variables(func);     // testing function
+    int num = variables(func).size();     // testing function
 
     cout << endl;
 
