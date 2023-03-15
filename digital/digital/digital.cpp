@@ -17,7 +17,7 @@ set<char> variables(string str);
 string reading_func();
 void print_variable_set(string str);
 vector<char> dec_to_binary(int n, string str);
-void generate_TT(int num, string str);
+void generate_TT(int num, string str, set<char> variables_list);
 
 
 void validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
@@ -111,9 +111,9 @@ vector<char> dec_to_binary(int n, string str)
     return binary;
 }
 
-vector<int> Get_Minterms(string str, int num_of_variables) {
-    string term = "";
+vector<string>input_fix_up(string str, set<char> variable_list ) {
     vector<string> terms_vec;
+    string term = "";
     for (int i = 0; i < str.size(); i++) {
         if (str[i] != '+')
             term += str[i];
@@ -124,15 +124,46 @@ vector<int> Get_Minterms(string str, int num_of_variables) {
 
     }
     terms_vec.push_back(term);
+    set<char>::iterator it = variable_list.begin();
+    for (it = variable_list.begin();it != variable_list.end(); it++) {
+        for (int j = 0; j < terms_vec.size();j++) {
+
+            if (terms_vec[j].find(*it) == string::npos) {
+
+                terms_vec[j]=(terms_vec[j] + (*it));
+                terms_vec.push_back(terms_vec[j] + "'");
+            }
+        }
+    }
+    //Testing
+    /*
+    for (int i = 0; i < terms_vec.size(); i++) {
+        cout << terms_vec[i] << endl;
+    }
+    cout << terms_vec.size();
+    */
+
+    return terms_vec;
+
+}
+
+vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_list) {
+    
+    vector<string> terms_vec;
+    terms_vec = input_fix_up(str, variables_list);
+   
     /* cout << "each term: " << endl;
      for (int i = 0; i < terms_vec.size(); i++) {
          cout << terms_vec[i] << endl;
      }
      */
+    set<char>::iterator it = variables_list.begin();
+    int y;
     vector<int> Minterms;
     int sum, count;
     for (int i = 0; i < terms_vec.size(); i++) {
         sum = 0;
+
 
         for (int j = 0; j < terms_vec[i].size(); j++) {
 
@@ -141,7 +172,11 @@ vector<int> Get_Minterms(string str, int num_of_variables) {
             else
             {
                 char x = terms_vec[i][j];
-                sum += pow(2, (num_of_variables - (int(x) - 97) - 1));
+                
+                 y = distance(variables_list.begin(), find(variables_list.begin(), variables_list.end(), x));
+                        
+                
+                sum += pow(2, (num_of_variables - int(y) - 1));
             }   //mariam did this
 
 
@@ -160,7 +195,7 @@ vector<int> Get_Minterms(string str, int num_of_variables) {
 
 
 
-void generate_TT(int num, string str)
+void generate_TT(int num, string str, set<char> variables_list)
 {
     print_variable_set(str);
     cout << str;
@@ -172,7 +207,7 @@ void generate_TT(int num, string str)
     vector<int>M;
     cout << endl;
     //Obtaining Minterms 
-    M = Get_Minterms(str, num);
+    M = Get_Minterms(str, num,variables_list);
 
 
     for (int i = 0; i < rows; i++)
@@ -198,6 +233,7 @@ void generate_TT(int num, string str)
         cout << endl;
     }
 }
+
 
 template<typename T>
 void swap(vector<T>& v, int a, int b) {
