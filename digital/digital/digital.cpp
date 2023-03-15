@@ -199,6 +199,56 @@ void generate_TT(int num, string str)
     }
 }
 
+template<typename T>
+void swap(vector<T>& v, int a, int b) {
+    T temp = v[a];
+    v[a] = v[b];
+    v[b] = temp;
+}
+
+template<typename T>
+void print(vector<T> v) {
+    for (int i = 0; i < v.size(); i++) {
+        cout << v[i] << "   ";
+    }
+    cout << endl;
+}
+
+
+void QMStep1(vector<string> minterms) {
+
+    cout << "QM STEP 1 TEST: \n";
+
+    vector<int> numOfOnes (minterms.size());
+
+    for (int i = 0; i < minterms.size(); i++) {
+        int count = 0;
+        for (int j = 0; j < minterms[i].size(); j++) {
+            if (minterms[i][j] == '1')
+                count++;
+        }
+        numOfOnes[i] = count;
+    }
+
+    cout << endl; 
+
+    for (int k = 0; k < numOfOnes.size() - 1; k++)
+    {
+        for (int l = 0; l < numOfOnes.size() - k - 1; l++) {
+            if (numOfOnes[l] > numOfOnes[l + 1]) {
+                swap(numOfOnes, l, l + 1);
+                swap(minterms, l, l + 1);
+            }
+        }
+    }
+
+    for (int a = 0; a < minterms.size(); a++) {
+        cout << minterms[a] << "   ";
+    }
+
+    cout << "\n QM STEP 1 TEST END \n";
+}
+
 //map<char, vector<char>> generate_map()
 //{
 //
@@ -206,15 +256,19 @@ void generate_TT(int num, string str)
 
 int main()
 {
-    string func;
-    func = reading_func();      //testing function
-    int num = variables(func).size();     // testing function
+    //string func;
+    //func = reading_func();      //testing function
+    //int num = variables(func).size();     // testing function
 
-    cout << endl;
+    //cout << endl;
 
-    generate_TT(num, func);     //test
-    Get_Minterms(func, num);
+    //generate_TT(num, func);     //test
+    //Get_Minterms(func, num);
+
+    vector<string> m = {
+        "111", "011", "100", "000", "101", "110"
+    };
+
+    QMStep1(m);
 
 }
-
-
