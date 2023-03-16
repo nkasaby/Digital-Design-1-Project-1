@@ -114,7 +114,7 @@ vector<char> dec_to_binary(int n, string str)
     return binary;
 }
 
-vector<string>input_fix_up(string str, set<char> variable_list ) {
+vector<string>input_fix_up(string str, set<char> variable_list ) { //ensures each term is represented with all literals
     vector<string> terms_vec;
     string term = "";
     for (int i = 0; i < str.size(); i++) {
@@ -150,7 +150,7 @@ vector<string>input_fix_up(string str, set<char> variable_list ) {
 
 }
 
-vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_list) {
+vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_list) { //returns vector of int resembling minterms
     
     vector<string> terms_vec;
     terms_vec = input_fix_up(str, variables_list);
@@ -197,7 +197,7 @@ vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_li
 }
 
 
-vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type) {
+vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type) { //type 0 returns binary vector of minterms and type 1 of maxterms
     string term = "";
     vector<string>Binary_Terms;
     if (type == 0) {
@@ -383,11 +383,6 @@ void QMStep1(vector<string> minterms) {
     cout << "\n QM STEP 1 TEST END \n";
 }
 
-//map<char, vector<char>> generate_map()
-//{
-//
-//}
-
 int main()
 {
     //string func;
@@ -396,7 +391,7 @@ int main()
 
     //cout << endl;
 
-    //generate_TT(num, func);     //test
+    //generate_TT(num, func, variables(func));     //test
     //Get_Minterms(func, num);
 
     vector<string> m = {
