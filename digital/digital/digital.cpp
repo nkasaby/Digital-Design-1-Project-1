@@ -12,7 +12,7 @@
 #include <map>
 using namespace std;
 
-void validate_alpha(string& str, int n);
+bool validate_alpha(string& str, int n);
 set<char> variables(string str);
 string reading_func();
 void print_variable_set(string str);
@@ -23,7 +23,8 @@ void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>
 vector<vector<char>> generate_TT(int num, string str, set<char> variables_list);
 
 
-void validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
+
+bool validate_alpha(string & str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
 {
     bool SOP = true;                                     // ** need to make sure that func doesnt have ' before a letter or end with a +
     for (int i = 0; i < n; i++) {
@@ -38,7 +39,7 @@ void validate_alpha(string& str, int n)                    // validating the SoP
                 SOP = false;
 
                 cout << "Invalid. Maximum number of vairables is 10. Please enter a new function." << endl;
-                reading_func();
+                return SOP;
             }
 
         }
@@ -49,12 +50,14 @@ void validate_alpha(string& str, int n)                    // validating the SoP
 
 
     }
-    if (SOP == true)
+    if (SOP == true) {
         cout << "SoP format" << endl;
+        return SOP;
+    }
     else
     {
         cout << "Invalid. Not in SoP format, please re-enter your function" << endl;
-        reading_func();
+        return SOP;
     }
 }
 
@@ -62,10 +65,13 @@ void validate_alpha(string& str, int n)                    // validating the SoP
 string reading_func()                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
 {
     string func;
-    cout << "Please enter a function as SoP with a maximum of 10 variables." << endl;
-    cin >> func;
-    int n = func.size();
-    validate_alpha(func, n);
+    bool valid = false;
+    while (!valid) {
+        cout << "Please enter a function as SoP with a maximum of 10 variables." << endl;
+        cin >> func;
+        int n = func.size();
+        valid=validate_alpha(func, n);
+    }
     return func;
 }
 
