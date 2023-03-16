@@ -17,7 +17,10 @@ set<char> variables(string str);
 string reading_func();
 void print_variable_set(string str);
 vector<char> dec_to_binary(int n, string str);
-void generate_TT(int num, string str, set<char> variables_list);
+vector<string>input_fix_up(string str, set<char> variable_list);
+vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type);
+void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>TT);
+vector<vector<char>> generate_TT(int num, string str, set<char> variables_list);
 
 
 void validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
@@ -111,7 +114,7 @@ vector<char> dec_to_binary(int n, string str)
     return binary;
 }
 
-vector<string>input_fix_up(string str, set<char> variable_list ) {
+vector<string>input_fix_up(string str, set<char> variable_list ) { //ensures each term is represented with all literals
     vector<string> terms_vec;
     string term = "";
     for (int i = 0; i < str.size(); i++) {
@@ -147,7 +150,7 @@ vector<string>input_fix_up(string str, set<char> variable_list ) {
 
 }
 
-vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_list) {
+vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_list) { //returns vector of int resembling minterms
     
     vector<string> terms_vec;
     terms_vec = input_fix_up(str, variables_list);
@@ -194,8 +197,100 @@ vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_li
 }
 
 
+vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type) { //type 0 returns binary vector of minterms and type 1 of maxterms
+    string term = "";
+    vector<string>Binary_Terms;
+    if (type == 0) {
+        for (int i = 0; i < TT.size(); i++) {
+            for (int j = 0; j < TT[i].size() - 1; j++) {
+                if (find(M.begin(), M.end(), i) != M.end())
+                    term += TT[i][j];
+            }
+            Binary_Terms.push_back(term);
+            term = "";
+        }
+    }
+    else if (type == 1) {
+        for (int i = 0; i < TT.size(); i++) {
+            for (int j = 0; j < TT[i].size() - 1; j++) {
+                if (find(M.begin(), M.end(), i) != M.end() == false)
+                    term += TT[i][j];
+            }
+            Binary_Terms.push_back(term);
+            term = "";
+        }
+    }
+    /*
+    for (int i = 0; i < Binary_Terms.size(); i++) {
+        cout << Binary_Terms[i] << endl;
+    }
+    */
+    return Binary_Terms;
 
-void generate_TT(int num, string str, set<char> variables_list)
+}
+
+
+
+void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>TT) {
+
+    vector<string> Minterms = Get_Binary_Min_Max(M, TT, 0);
+    vector<string> Maxterms = Get_Binary_Min_Max(M, TT, 1);
+    /* for (int i = 0; i < Minterms.size(); i++) {
+         cout << Minterms[i] << endl;
+     }
+     */
+    string canonical = "";
+    //Sop
+    char literal;
+    set<char>::iterator it = variables_list.begin();
+    bool added = false;
+
+    for (int i = 0; i < Minterms.size(); i++) {
+        for (int j = 0; j < Minterms[i].size(); j++) {
+
+            advance(it, j);
+            literal = *it;
+            canonical += literal;
+            added = true;
+            if (Minterms[i][j] == '0')
+                canonical += '\'';
+            it = variables_list.begin();
+        }
+        if (added)
+            canonical += '+';
+        added = false;
+    }
+    canonical = canonical.substr(0, canonical.length() - 1);
+    cout << endl << "Canonical SoP form: " << canonical << endl;
+    it = variables_list.begin();
+    canonical = "";
+    canonical += '(';
+
+    for (int i = 0; i < Maxterms.size(); i++) {
+        for (int j = 0; j < Maxterms[i].size(); j++) {
+
+            advance(it, j);
+            literal = *it;
+            canonical += literal;
+            added = true;
+            if (Maxterms[i][j] == '0')
+                canonical += '\'';
+            it = variables_list.begin();
+            if (j != Maxterms[i].size() - 1)
+                canonical += '+';
+        }
+        if (added)
+            canonical += ")(";
+        added = false;
+    }
+    canonical = canonical.substr(0, canonical.length() - 1);
+    cout << "Canonical Pos form: " << canonical << endl;
+
+
+}
+
+
+vector<vector<char>> generate_TT(int num, string str, set<char> variables_list)
 {
     print_variable_set(str);
     cout << str;
@@ -207,7 +302,7 @@ void generate_TT(int num, string str, set<char> variables_list)
     vector<int>M;
     cout << endl;
     //Obtaining Minterms 
-    M = Get_Minterms(str, num,variables_list);
+    M = Get_Minterms(str, num, variables_list);
 
 
     for (int i = 0; i < rows; i++)
@@ -232,8 +327,11 @@ void generate_TT(int num, string str, set<char> variables_list)
         }
         cout << endl;
     }
-}
 
+    Print_Sop_Pos(variables_list, M, TT);
+
+    return TT;
+}
 
 template<typename T>
 void swap(vector<T>& v, int a, int b) {
@@ -305,11 +403,6 @@ void QMStep1(vector<string> minterms) {
     // cout << minterms[1] << endl << minterms[2] << endl;
 }
 
-//map<char, vector<char>> generate_map()
-//{
-//
-//}
-
 int main()
 {
     //string func;
@@ -318,7 +411,7 @@ int main()
 
     //cout << endl;
 
-    //generate_TT(num, func);     //test
+    //generate_TT(num, func, variables(func));     //test
     //Get_Minterms(func, num);
 
     vector<string> m = {
