@@ -12,9 +12,11 @@
 #include <map>
 using namespace std;
 
+
 bool validate_alpha(string& str, int n);
 set<char> variables(string str);
 string reading_func();
+string Remove_Spaces(string str);
 void print_variable_set(string str);
 vector<char> dec_to_binary(int n, string str);
 vector<string>input_fix_up(string str, set<char> variable_list);
@@ -24,7 +26,7 @@ vector<vector<char>> generate_TT(int num, string str, set<char> variables_list);
 
 
 
-bool validate_alpha(string & str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
+bool validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
 {
     bool SOP = true;                                     // ** need to make sure that func doesnt have ' before a letter or end with a +
     for (int i = 0; i < n; i++) {
@@ -43,7 +45,7 @@ bool validate_alpha(string & str, int n)                    // validating the So
             }
 
         }
-        else if (str[i] != '+' && str[i] != '\'') {
+        else if (str[i] != '+' && str[i] != '\'' && str[i] != ' ') {
             SOP = false;
             break;
         }
@@ -61,6 +63,15 @@ bool validate_alpha(string & str, int n)                    // validating the So
     }
 }
 
+string Remove_Spaces(string str) {
+    string new_str="";
+    for (int i = 0; i < str.size(); i++) {
+        if (!isspace(str[i]))
+            new_str += str[i];
+    }
+    return new_str;
+}
+
 
 string reading_func()                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
 {
@@ -68,10 +79,11 @@ string reading_func()                            //very basic function that take
     bool valid = false;
     while (!valid) {
         cout << "Please enter a function as SoP with a maximum of 10 variables." << endl;
-        cin >> func;
+        getline( cin,func);
         int n = func.size();
-        valid=validate_alpha(func, n);
+        valid = validate_alpha(func, n);
     }
+    func = Remove_Spaces(func);
     return func;
 }
 
