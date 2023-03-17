@@ -28,7 +28,7 @@ template<typename T>
 void swap(vector<T>& v, int a, int b);
 template<typename T>
 void print(vector<T> v);
-void QMStep1(vector<string> minterms);
+set<string> QMStep1(vector<string> minterms, set<char> variables_list, vector<string> not_combined, set<string> PI_set);
 set<string> translateCombined(set<string> combined, set<char> vars);
 void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations);
 
@@ -71,12 +71,72 @@ bool validate_alpha(string& str, int n)                    // validating the SoP
 }
 
 string Remove_Spaces(string str) {
-    string new_str="";
+    string new_str = "";
     for (int i = 0; i < str.size(); i++) {
         if (!isspace(str[i]))
             new_str += str[i];
     }
     return new_str;
+}
+string Remove_Repetitions(string str, set<char> variable_list) {
+    //Handling of repetitions
+    string final = "";
+    bool valid = true;
+    vector<string> terms_vec;
+    vector<string> temp;
+    string term = "";
+    for (int i = 0; i < str.size(); i++) {
+        if (str[i] != '+')
+            term += str[i];
+        else {
+            terms_vec.push_back(term);
+            term = "";
+        }
+
+    }
+    terms_vec.push_back(term);
+    map<char, int >frequency;
+    set<char>::iterator it = variable_list.begin();
+
+    for (int i = 0; i < terms_vec.size(); i++) {
+        valid = true;
+        for (it = variable_list.begin(); it != variable_list.end(); it++) {
+            frequency[*it] = 0;
+        }
+        for (int j = 0; j < terms_vec[i].size(); j++) {
+            if (frequency[terms_vec[i][j]] == 0) {
+                final += terms_vec[i][j];
+                frequency[terms_vec[i][j]]++;
+            }
+            else {
+                if (terms_vec[i][j + 1] == '\'')
+                    valid = false;
+            }
+            //end of first for loop
+            if (!valid)
+                final = final.substr(0, final.length() - j); //-1??
+        }
+        if (valid)
+            temp.push_back(final);
+        final = "";
+
+    }
+    final = "";
+    /*
+    cout << "printing" << endl;
+    for (int i = 0; i<temp.size(); i++) {
+        cout << temp[i] << endl;
+    }
+    */
+    for (int i = 0; i < temp.size(); i++) {
+        for (int j = 0; j < temp[i].size(); j++) {
+            final += temp[i][j];
+        }
+        final += '+';
+    }
+    final = final.substr(0, final.length() - 1);
+
+    return final;
 }
 
 string reading_func()                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
@@ -85,11 +145,13 @@ string reading_func()                            //very basic function that take
     bool valid = false;
     while (!valid) {
         cout << "Please enter a function as SoP with a maximum of 10 variables." << endl;
-        getline( cin,func);
+        getline(cin, func);
         int n = func.size();
         valid = validate_alpha(func, n);
     }
+
     func = Remove_Spaces(func);
+    func = Remove_Repetitions(func, variables(func));
     transform(func.begin(), func.end(), func.begin(), ::tolower);
     return func;
 }
@@ -139,7 +201,7 @@ vector<char> dec_to_binary(int n, string str)
     return binary;
 }
 
-vector<string>input_fix_up(string str, set<char> variable_list ) { //ensures each term is represented with all literals
+vector<string>input_fix_up(string str, set<char> variable_list) { //ensures each term is represented with all literals
     vector<string> terms_vec;
     string term = "";
     for (int i = 0; i < str.size(); i++) {
@@ -153,12 +215,12 @@ vector<string>input_fix_up(string str, set<char> variable_list ) { //ensures eac
     }
     terms_vec.push_back(term);
     set<char>::iterator it = variable_list.begin();
-    for (it = variable_list.begin();it != variable_list.end(); it++) {
-        for (int j = 0; j < terms_vec.size();j++) {
+    for (it = variable_list.begin(); it != variable_list.end(); it++) {
+        for (int j = 0; j < terms_vec.size(); j++) {
 
             if (terms_vec[j].find(*it) == string::npos) {
 
-                terms_vec[j]=(terms_vec[j] + (*it));
+                terms_vec[j] = (terms_vec[j] + (*it));
                 terms_vec.push_back(terms_vec[j] + "'");
             }
         }
@@ -171,15 +233,17 @@ vector<string>input_fix_up(string str, set<char> variable_list ) { //ensures eac
     cout << terms_vec.size();
     */
 
+
+
     return terms_vec;
 
 }
 
-vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_list) { //returns vector of int resembling minterms
-    
+vector<int> Get_Minterms(string str, int num_of_variables, set<char> variables_list) { //returns vector of int resembling minterms
+
     vector<string> terms_vec;
     terms_vec = input_fix_up(str, variables_list);
-   
+
     /* cout << "each term: " << endl;
      for (int i = 0; i < terms_vec.size(); i++) {
          cout << terms_vec[i] << endl;
@@ -200,10 +264,10 @@ vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_li
             else
             {
                 char x = terms_vec[i][j];
-                
-                 y = distance(variables_list.begin(), find(variables_list.begin(), variables_list.end(), x));
-                        
-                
+
+                y = distance(variables_list.begin(), find(variables_list.begin(), variables_list.end(), x));
+
+
                 sum += pow(2, (num_of_variables - int(y) - 1));
             }   //mariam did this
 
@@ -296,7 +360,7 @@ void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>
             literal = *it;
             canonical += literal;
             added = true;
-            if (Maxterms[i][j] == '0')
+            if (Maxterms[i][j] == '1')
                 canonical += '\'';
             it = variables_list.begin();
             if (j != Maxterms[i].size() - 1)
@@ -370,7 +434,142 @@ void print(vector<T> v) {
     cout << endl;
 }
 
-void QMStep1(vector<string> minterms) {
+vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variables_list, vector<string>& combined, vector<string>& notcombined, vector<string>& joined, set<string> not_comb_set)
+{
+    cout << "\n----------------NEW COMPARISON -------------\n";
+    int numvar = variables_list.size();
+    int difference = 0;
+    string new_term = "";
+    // set<string> not_comb_set;
+     //comparison = 0
+
+    for (int i = 0; i < v.size(); i++)
+        cout << v[i] << " ";
+    cout << endl;
+
+    for (int j = 0; j < w.size(); j++)
+        cout << w[j] << " ";
+    cout << endl;
+
+    for (int i = 0; i < v.size(); i++)
+    {
+        for (int j = 0; j < w.size(); j++)
+        {
+            for (int k = 0; k < numvar; k++)
+            {
+                if (v[i].at(k) != w[j].at(k))
+                {
+                    difference++;
+                }
+            }
+            cout << "diff: " << difference << endl;
+            for (int k = 0; k < numvar; k++)
+            {
+                if (difference == 1 && v[i].at(k) != w[j].at(k))
+                {
+                    new_term += "_";
+                }
+                else if (difference == 1 && v[i].at(k) == w[j].at(k))
+                {
+                    new_term += v[i].at(k);
+                }
+
+            }
+
+            if (difference != 1)
+            {
+                cout << "terms cannot be combined" << endl;
+                notcombined.push_back(v[i]);;
+                notcombined.push_back(w[j]);
+            }
+            cout << "new term: " << new_term << endl << endl;
+
+            if (difference == 1)
+            {
+                combined.push_back(new_term);
+                //comparison++;
+                joined.push_back(v[i]);
+                joined.push_back(w[j]);
+            }
+
+            /* for (int i = 0; i < notcombined.size(); i++)
+             {
+                 if (notcombined[i] == " ")
+                 {
+                     notcombined[i].erase();
+                 }
+                 if (notcombined[i] == notcombined[i + 1])
+                     notcombined[i + 1].erase();
+             }*/
+
+
+            new_term = "";
+            //  comparison = 0;
+            difference = 0;
+            //  if (w[j])
+              //    break;
+        }
+
+    }
+
+    for (int i = 0; i < notcombined.size(); i++)
+    {
+        for (int j = 0; j < joined.size(); j++)
+        {
+            if (notcombined[i] == joined[j])
+            {
+                notcombined[i].erase();
+            }
+        }
+    }
+
+
+
+
+
+    cout << "***check size: " << combined.size() << endl;
+    cout << "****" << endl;
+
+    cout << "combined vector: " << endl;
+    for (int f = 0; f < combined.size(); f++)
+    {
+        cout << combined[f] << " ";
+    }
+
+    cout << endl << "not combined vector: " << endl;
+
+    for (int f = 0; f < notcombined.size(); f++)
+    {
+        cout << notcombined[f] << " ";
+    }
+
+    cout << endl << "===================================SET================================" << endl;
+    for (auto i = not_comb_set.begin(); i != not_comb_set.end(); i++)
+    {
+        cout << *i << " ";
+    }
+    cout << endl << "==============================PLS================================" << endl;
+
+    cout << endl;
+
+    cout << endl << "joined vector: " << endl;
+
+    for (int f = 0; f < joined.size(); f++)
+    {
+        cout << joined[f] << " ";
+    }
+    cout << "****" << endl;
+
+    return combined;
+}
+
+set<string> QMStep1(vector<string> minterms, set<char> variables_list, vector<string> not_combined, set<string> PI_set) {
+
+    vector <string> str;
+    vector<string> joined;
+    vector<string> combined;
+    // set<string> PI_set;
+    int comp = 0;
 
     cout << "QM STEP 1 TEST: \n";
 
@@ -404,8 +603,6 @@ void QMStep1(vector<string> minterms) {
 
     cout << "\n QM STEP 1 TEST END \n";
 
-
-
     for (int i = 0; i < numOfOnes.size(); i++)
     {
         groups[numOfOnes[i]].push_back(minterms[i]);
@@ -413,15 +610,59 @@ void QMStep1(vector<string> minterms) {
 
     for (auto i : groups)
     {
+
         cout << i.first << "->";
         for (auto j : i.second)
             cout << j << " ";
         cout << endl;
     }
 
+    if (groups.size() == 1) {
+        for (int x = 0; x < groups[numOfOnes[0]].size(); x++) {
+            not_combined.push_back(groups[numOfOnes[0]][x]);
+        }
+
+        for (int i = 0; i < not_combined.size(); i++)
+        {
+            PI_set.insert(not_combined[i]);
+        }
+        cout << "FINAL VERSION NOT COMBINED: \n";
+
+        for (auto i = PI_set.begin(); i != PI_set.end(); i++)
+        {
+            cout << *i << " ";
+        }
+
+        return PI_set;
+    }
 
 
-    // cout << minterms[1] << endl << minterms[2] << endl;
+    for (auto it1 = groups.begin(); it1 != groups.end(); ++it1) {                              //loops to access value elements of the map
+        for (auto it2 = groups.begin(); it2 != groups.end(); ++it2) {
+
+            {
+                if (it1->first == it2->first - 1)
+                    str = compare_vec(it1->second, it2->second, variables_list, combined, not_combined, joined, PI_set);
+            }
+        }
+    }
+    cout << endl << "=============================================================================================================" << endl;
+    if (combined.size() == 0) {
+        for (int i = 0; i < not_combined.size(); i++)
+        {
+            PI_set.insert(not_combined[i]);
+        }
+        cout << "FINAL VERSION NOT COMBINED: \n";
+
+        for (auto i = PI_set.begin(); i != PI_set.end(); i++)
+        {
+            cout << *i << " ";
+        }
+        return PI_set;
+    }
+
+    QMStep1(str, variables_list, not_combined, PI_set);
+    return PI_set;
 }
 
 set<string> translateCombined(set<string> combined, set<char> vars) {
@@ -429,7 +670,7 @@ set<string> translateCombined(set<string> combined, set<char> vars) {
     set<string> translated;
     set<char>::iterator it = vars.begin();
     char letter;
-    for (auto i = combined.begin(); i != combined.end();i++) {
+    for (auto i = combined.begin(); i != combined.end(); i++) {
         Implicant = "";
         for (int j = 0; j < (*i).size(); j++) {
             if ((*i)[j] != '_') {
@@ -476,7 +717,7 @@ void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations) {
 
 
     cout << "Essentials: \n";
-    for (auto i = essentials.begin(); i != essentials.end() ;i++) {
+    for (auto i = essentials.begin(); i != essentials.end(); i++) {
         cout << *i << endl;
     }
     cout << "\nNon-Essentials: \n";
@@ -487,23 +728,30 @@ void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations) {
 
 int main()
 {
-    vector<vector<int>> test = {{2,3} , {3,7} , {3,11}, {5,7} , {5,13} , {9,11} , {9,13} , {14,30} , {0,2,16,18} , {16,24,18,26} , {24,28,26,30}};
-    vector<string> test2 = { "0001_","00_11","0_011","001_1","0_101","010_1", "01_01","_1110","_00_0","1_0_0","11__0"};
-    Part4(test, test2);
+    //vector<vector<int>> test = { {2,3} , {3,7} , {3,11}, {5,7} , {5,13} , {9,11} , {9,13} , {14,30} , {0,2,16,18} , {16,24,18,26} , {24,28,26,30} };
+    //vector<string> test2 = { "0001_","00_11","0_011","001_1","0_101","010_1", "01_01","1110","_00_0","1_0_0","11_0" };
+    //Part4(test, test2);
 
-   
-    string func;
-    func = reading_func();      //testing function
-    int num = variables(func).size();     // testing function
-    
-    cout << endl;
 
-    generate_TT(num, func, variables(func));     //test
+    //string func;
+    //func = reading_func();      //testing function
+    //int num = variables(func).size();     // testing function
 
-    vector<string> m = {
-        "111", "011", "100", "000", "101", "110"
+    //cout << endl;
+
+    //generate_TT(num, func, variables(func));     //test
+
+    //vector<string> m = {
+    //    "111", "011", "100", "000", "101", "110"
+    //};
+
+    vector<string> not_combined;
+    vector<string> joined;
+    set<string> PIset;
+    vector <string> n =
+    {
+        {"00000", "00010", "10000", "00011", "00101", "01001", "10010", "11000", "00111", "01011", "01101", "01110", "11010", "11100", "11110"}
     };
 
-    QMStep1(m);
-
+    QMStep1(n, { 'a','b','c','d','e' }, not_combined, PIset);
 }
