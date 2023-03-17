@@ -8,22 +8,32 @@
 #include <vector>
 #include <string>
 #include <ctype.h>
+#include <algorithm> 
 #include <set>
 #include <map>
 using namespace std;
 
-void validate_alpha(string& str, int n);
-set<char> variables(string str);
+
+bool validate_alpha(string& str, int n);
+string Remove_Spaces(string str);
 string reading_func();
+set<char> variables(string str);
 void print_variable_set(string str);
 vector<char> dec_to_binary(int n, string str);
 vector<string>input_fix_up(string str, set<char> variable_list);
 vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type);
 void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>TT);
 vector<vector<char>> generate_TT(int num, string str, set<char> variables_list);
+template<typename T>
+void swap(vector<T>& v, int a, int b);
+template<typename T>
+void print(vector<T> v);
+void QMStep1(vector<string> minterms);
+set<string> translateCombined(set<string> combined, set<char> vars);
+void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations);
 
 
-void validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
+bool validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
 {
     bool SOP = true;                                     // ** need to make sure that func doesnt have ' before a letter or end with a +
     for (int i = 0; i < n; i++) {
@@ -38,34 +48,49 @@ void validate_alpha(string& str, int n)                    // validating the SoP
                 SOP = false;
 
                 cout << "Invalid. Maximum number of vairables is 10. Please enter a new function." << endl;
-                reading_func();
+                return SOP;
             }
 
         }
-        else if (str[i] != '+' && str[i] != '\'') {
+        else if (str[i] != '+' && str[i] != '\'' && str[i] != ' ') {
             SOP = false;
             break;
         }
 
 
     }
-    if (SOP == true)
+    if (SOP == true) {
         cout << "SoP format" << endl;
+        return SOP;
+    }
     else
     {
         cout << "Invalid. Not in SoP format, please re-enter your function" << endl;
-        reading_func();
+        return SOP;
     }
 }
 
+string Remove_Spaces(string str) {
+    string new_str="";
+    for (int i = 0; i < str.size(); i++) {
+        if (!isspace(str[i]))
+            new_str += str[i];
+    }
+    return new_str;
+}
 
 string reading_func()                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
 {
     string func;
-    cout << "Please enter a function as SoP with a maximum of 10 variables." << endl;
-    cin >> func;
-    int n = func.size();
-    validate_alpha(func, n);
+    bool valid = false;
+    while (!valid) {
+        cout << "Please enter a function as SoP with a maximum of 10 variables." << endl;
+        getline( cin,func);
+        int n = func.size();
+        valid = validate_alpha(func, n);
+    }
+    func = Remove_Spaces(func);
+    transform(func.begin(), func.end(), func.begin(), ::tolower);
     return func;
 }
 
@@ -196,7 +221,6 @@ vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_li
     return Minterms;
 }
 
-
 vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type) { //type 0 returns binary vector of minterms and type 1 of maxterms
     string term = "";
     vector<string>Binary_Terms;
@@ -229,8 +253,6 @@ vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int typ
 
 }
 
-
-
 void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>TT) {
 
     vector<string> Minterms = Get_Binary_Min_Max(M, TT, 0);
@@ -260,6 +282,7 @@ void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>
             canonical += '+';
         added = false;
     }
+
     canonical = canonical.substr(0, canonical.length() - 1);
     cout << endl << "Canonical SoP form: " << canonical << endl;
     it = variables_list.begin();
@@ -288,7 +311,6 @@ void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>
 
 
 }
-
 
 vector<vector<char>> generate_TT(int num, string str, set<char> variables_list)
 {
@@ -348,7 +370,6 @@ void print(vector<T> v) {
     cout << endl;
 }
 
-
 void QMStep1(vector<string> minterms) {
 
     cout << "QM STEP 1 TEST: \n";
@@ -403,16 +424,81 @@ void QMStep1(vector<string> minterms) {
     // cout << minterms[1] << endl << minterms[2] << endl;
 }
 
+set<string> translateCombined(set<string> combined, set<char> vars) {
+    string Implicant;
+    set<string> translated;
+    set<char>::iterator it = vars.begin();
+    char letter;
+    for (auto i = combined.begin(); i != combined.end();i++) {
+        Implicant = "";
+        for (int j = 0; j < (*i).size(); j++) {
+            if ((*i)[j] != '_') {
+                advance(it, j);
+                letter = *it;
+                Implicant += letter;
+                if ((*i)[j] == '0')
+                    Implicant += '\'';
+            }
+            it = vars.begin();
+        }
+        translated.insert(Implicant);
+    }
+    return translated;
+}
+
+void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations) {
+    //{ {1,4,6,8} , {3,2,6,8} , {2,8} }
+    map<int, int> smthn;
+    map<int, vector<string>> things;
+    for (int i = 0; i < Mcombinations.size(); i++) {
+        for (int j = 0; j < Mcombinations[i].size(); j++) {
+            smthn[Mcombinations[i][j]]++;
+            things[Mcombinations[i][j]].push_back(Bcombinations[i]);
+        }
+    }
+
+    set<string> essentials;
+    set<string> nonEssentials;
+
+    for (auto i : smthn) {
+        if (i.second == 1) {
+            essentials.insert(things[i.first][0]);
+        }
+    }
+
+    for (int i = 0; i < Bcombinations.size(); i++) {
+        if (essentials.find(Bcombinations[i]) == essentials.end())
+            nonEssentials.insert(Bcombinations[i]);
+    }
+
+    essentials = translateCombined(essentials, { 'a','b','c','d', 'e' });
+    nonEssentials = translateCombined(nonEssentials, { 'a','b','c','d', 'e' });
+
+
+    cout << "Essentials: \n";
+    for (auto i = essentials.begin(); i != essentials.end() ;i++) {
+        cout << *i << endl;
+    }
+    cout << "\nNon-Essentials: \n";
+    for (auto i = nonEssentials.begin(); i != nonEssentials.end(); i++) {
+        cout << *i << endl;
+    }
+}
+
 int main()
 {
-    //string func;
-    //func = reading_func();      //testing function
-    //int num = variables(func).size();     // testing function
+    vector<vector<int>> test = {{2,3} , {3,7} , {3,11}, {5,7} , {5,13} , {9,11} , {9,13} , {14,30} , {0,2,16,18} , {16,24,18,26} , {24,28,26,30}};
+    vector<string> test2 = { "0001_","00_11","0_011","001_1","0_101","010_1", "01_01","_1110","_00_0","1_0_0","11__0"};
+    Part4(test, test2);
 
-    //cout << endl;
+   
+    string func;
+    func = reading_func();      //testing function
+    int num = variables(func).size();     // testing function
+    
+    cout << endl;
 
-    //generate_TT(num, func, variables(func));     //test
-    //Get_Minterms(func, num);
+    generate_TT(num, func, variables(func));     //test
 
     vector<string> m = {
         "111", "011", "100", "000", "101", "110"
