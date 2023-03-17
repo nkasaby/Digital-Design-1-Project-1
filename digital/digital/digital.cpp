@@ -14,16 +14,21 @@ using namespace std;
 
 
 bool validate_alpha(string& str, int n);
-set<char> variables(string str);
-string reading_func();
 string Remove_Spaces(string str);
+string reading_func();
+set<char> variables(string str);
 void print_variable_set(string str);
 vector<char> dec_to_binary(int n, string str);
 vector<string>input_fix_up(string str, set<char> variable_list);
 vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type);
 void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>TT);
 vector<vector<char>> generate_TT(int num, string str, set<char> variables_list);
-
+template<typename T>
+void swap(vector<T>& v, int a, int b);
+template<typename T>
+void print(vector<T> v);
+void QMStep1(vector<string> minterms);
+void Part4(vector<vector<int>> combinations);
 
 
 bool validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
@@ -71,7 +76,6 @@ string Remove_Spaces(string str) {
     }
     return new_str;
 }
-
 
 string reading_func()                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
 {
@@ -214,7 +218,6 @@ vector<int> Get_Minterms(string str, int num_of_variables,set<char> variables_li
     return Minterms;
 }
 
-
 vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type) { //type 0 returns binary vector of minterms and type 1 of maxterms
     string term = "";
     vector<string>Binary_Terms;
@@ -247,8 +250,6 @@ vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int typ
 
 }
 
-
-
 void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>TT) {
 
     vector<string> Minterms = Get_Binary_Min_Max(M, TT, 0);
@@ -278,6 +279,7 @@ void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>
             canonical += '+';
         added = false;
     }
+
     canonical = canonical.substr(0, canonical.length() - 1);
     cout << endl << "Canonical SoP form: " << canonical << endl;
     it = variables_list.begin();
@@ -306,7 +308,6 @@ void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>
 
 
 }
-
 
 vector<vector<char>> generate_TT(int num, string str, set<char> variables_list)
 {
@@ -366,7 +367,6 @@ void print(vector<T> v) {
     cout << endl;
 }
 
-
 void QMStep1(vector<string> minterms) {
 
     cout << "QM STEP 1 TEST: \n";
@@ -401,8 +401,35 @@ void QMStep1(vector<string> minterms) {
     cout << "\n QM STEP 1 TEST END \n";
 }
 
+void Part4(vector<vector<int>> combinations) {
+    //{ {1,4,6,8} , {3,2,6,8} , {2,8} }
+    map<int, int> smthn;
+    map<int, vector<vector<int>>> EPI;
+    for (int i = 0; i < combinations.size(); i++) {
+        for (int j = 0; j < combinations[i].size(); j++) {
+            smthn[combinations[i][j]]++;
+            EPI[combinations[i][j]].push_back(combinations[i]);
+        }
+    }
+
+    cout << "EPI's: \n";
+    for (auto i : smthn) {
+        if (i.second == 1) {
+            print(EPI[i.first][0]);
+        }
+    }
+}
+
+
 int main()
 {
+    vector<vector<int>> test = {{2,3} , {3,7} , {3,11}, {5,7} , {5,13} , {9,11} , {9,13} , {14,30} , {0,2,16,18} , {16,24,18,26} , {24,28,26,30}};
+    vector<vector<string>> test2 = { {"0001_"},{"00_11"},{"0_011"},{"001_1"},{"0_101"},{"010_1"}, {"01_01"},{"_1110"},{"_00_0"},{"1_0_0"},{"11__0"}};
+    //if test points to test2 then i can very easily do this
+
+    Part4(test);
+
+    return 0;
     //string func;
     //func = reading_func();      //testing function
     //int num = variables(func).size();     // testing function
