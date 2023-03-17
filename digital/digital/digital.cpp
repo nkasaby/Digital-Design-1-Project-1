@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include <ctype.h>
+#include <algorithm> 
 #include <set>
 #include <map>
 using namespace std;
@@ -28,7 +29,8 @@ void swap(vector<T>& v, int a, int b);
 template<typename T>
 void print(vector<T> v);
 void QMStep1(vector<string> minterms);
-void Part4(vector<vector<int>> combinations);
+set<string> translateCombined(set<string> combined, set<char> vars);
+void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations);
 
 
 bool validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
@@ -88,6 +90,7 @@ string reading_func()                            //very basic function that take
         valid = validate_alpha(func, n);
     }
     func = Remove_Spaces(func);
+    transform(func.begin(), func.end(), func.begin(), ::tolower);
     return func;
 }
 
@@ -401,43 +404,81 @@ void QMStep1(vector<string> minterms) {
     cout << "\n QM STEP 1 TEST END \n";
 }
 
-void Part4(vector<vector<int>> combinations) {
-    //{ {1,4,6,8} , {3,2,6,8} , {2,8} }
-    map<int, int> smthn;
-    map<int, vector<vector<int>>> EPI;
-    for (int i = 0; i < combinations.size(); i++) {
-        for (int j = 0; j < combinations[i].size(); j++) {
-            smthn[combinations[i][j]]++;
-            EPI[combinations[i][j]].push_back(combinations[i]);
+set<string> translateCombined(set<string> combined, set<char> vars) {
+    string Implicant;
+    set<string> translated;
+    set<char>::iterator it = vars.begin();
+    char letter;
+    for (auto i = combined.begin(); i != combined.end();i++) {
+        Implicant = "";
+        for (int j = 0; j < (*i).size(); j++) {
+            if ((*i)[j] != '_') {
+                advance(it, j);
+                letter = *it;
+                Implicant += letter;
+                if ((*i)[j] == '0')
+                    Implicant += '\'';
+            }
+            it = vars.begin();
         }
+        translated.insert(Implicant);
     }
-
-    cout << "EPI's: \n";
-    for (auto i : smthn) {
-        if (i.second == 1) {
-            print(EPI[i.first][0]);
-        }
-    }
+    return translated;
 }
 
+void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations) {
+    //{ {1,4,6,8} , {3,2,6,8} , {2,8} }
+    map<int, int> smthn;
+    map<int, vector<string>> things;
+    for (int i = 0; i < Mcombinations.size(); i++) {
+        for (int j = 0; j < Mcombinations[i].size(); j++) {
+            smthn[Mcombinations[i][j]]++;
+            things[Mcombinations[i][j]].push_back(Bcombinations[i]);
+        }
+    }
+
+    set<string> essentials;
+    set<string> nonEssentials;
+
+    for (auto i : smthn) {
+        if (i.second == 1) {
+            essentials.insert(things[i.first][0]);
+        }
+    }
+
+    for (int i = 0; i < Bcombinations.size(); i++) {
+        if (essentials.find(Bcombinations[i]) == essentials.end())
+            nonEssentials.insert(Bcombinations[i]);
+    }
+
+    essentials = translateCombined(essentials, { 'a','b','c','d', 'e' });
+    nonEssentials = translateCombined(nonEssentials, { 'a','b','c','d', 'e' });
+
+
+    cout << "Essentials: \n";
+    for (auto i = essentials.begin(); i != essentials.end() ;i++) {
+        cout << *i << endl;
+    }
+    cout << "\nNon-Essentials: \n";
+    for (auto i = nonEssentials.begin(); i != nonEssentials.end(); i++) {
+        cout << *i << endl;
+    }
+}
 
 int main()
 {
     vector<vector<int>> test = {{2,3} , {3,7} , {3,11}, {5,7} , {5,13} , {9,11} , {9,13} , {14,30} , {0,2,16,18} , {16,24,18,26} , {24,28,26,30}};
-    vector<vector<string>> test2 = { {"0001_"},{"00_11"},{"0_011"},{"001_1"},{"0_101"},{"010_1"}, {"01_01"},{"_1110"},{"_00_0"},{"1_0_0"},{"11__0"}};
-    //if test points to test2 then i can very easily do this
+    vector<string> test2 = { "0001_","00_11","0_011","001_1","0_101","010_1", "01_01","_1110","_00_0","1_0_0","11__0"};
+    Part4(test, test2);
 
-    Part4(test);
+   
+    string func;
+    func = reading_func();      //testing function
+    int num = variables(func).size();     // testing function
+    
+    cout << endl;
 
-    return 0;
-    //string func;
-    //func = reading_func();      //testing function
-    //int num = variables(func).size();     // testing function
-
-    //cout << endl;
-
-    //generate_TT(num, func, variables(func));     //test
-    //Get_Minterms(func, num);
+    generate_TT(num, func, variables(func));     //test
 
     vector<string> m = {
         "111", "011", "100", "000", "101", "110"
