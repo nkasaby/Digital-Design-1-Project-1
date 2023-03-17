@@ -589,7 +589,7 @@ set<string> translateCombined(set<string> combined, set<char> vars) {
         translated.insert(Implicant);
     }
 
-    for (auto i = combined.begin(); i != combined.end(); i++)
+    for (auto i = translated.begin(); i != translated.end(); i++)
     {
         cout << *i << " ";
     }
@@ -599,7 +599,6 @@ set<string> translateCombined(set<string> combined, set<char> vars) {
 }
 
 void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<char> vars) {
-    //{ {1,4,6,8} , {3,2,6,8} , {2,8} }
     map<int, int> smthn;
     map<int, vector<string>> things;
     for (int i = 0; i < Mcombinations.size(); i++) {
@@ -631,11 +630,13 @@ void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<
     for (auto i = essentials.begin(); i != essentials.end(); i++) {
         cout << *i << endl;
     }
-    cout << "\nNon-Essentials: \n";
+    /*cout << "\nNon-Essentials: \n";
     for (auto i = nonEssentials.begin(); i != nonEssentials.end(); i++) {
         cout << *i << endl;
-    }
+    }*/
 }
+
+
 
 int main()
 {
