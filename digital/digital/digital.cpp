@@ -475,7 +475,6 @@ vector<int> binaryToDecimal(vector<string> binary_numbers) {
     return decimal_numbers;
 }
 
-    
 vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variables_list, vector<string>& combined, vector<string>& notcombined, vector<string>& joined, set<string> not_comb_set)
 {
     int numvar = variables_list.size();
@@ -553,21 +552,21 @@ vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variabl
 
 
 
-    mins_dec = binaryToDecimal(mins);
+    //mins_dec = binaryToDecimal(mins);
 
-    cout << endl;
-    int max = pow(2, numvar) - 1;
-    vector<int> final;
-    for (int i = 0; i < mins_dec.size(); i++) {
-        if (mins_dec[i] <= max)
-            final.push_back(mins_dec[i]);
-   
-    }
-    for (auto i = final.begin(); i !=final.end(); i++) {
-        cout <<*i << " ";
-    }
-    cout << endl;
-   // cout << "===========================================================================================" << endl;
+    //cout << endl;
+    //int max = pow(2, numvar) - 1;
+    //vector<int> final;
+    //for (int i = 0; i < mins_dec.size(); i++) {
+    //    if (mins_dec[i] <= max)
+    //        final.push_back(mins_dec[i]);
+
+    //}
+    //for (auto i = final.begin(); i != final.end(); i++) {
+    //    cout << *i << " ";
+    //}
+    //cout << endl;
+    //// cout << "===========================================================================================" << endl;
 
     return combined;
 }
@@ -640,6 +639,34 @@ set<string> QMStep1(vector<string> minterms, set<char> variables_list, vector<st
     return PI_set_final;
 }
 
+void padUnderscores(string binary, set<string>& pad) {
+    if (binary.length() == 0)
+        return;
+    for (int j = 0; j < binary.size(); j++) {
+        if (binary[j] == '_') {
+            binary[j] = '0';
+            padUnderscores(binary, pad);
+            binary[j] = '1';
+            padUnderscores(binary, pad);
+        }
+    }
+    pad.insert(binary);
+}
+
+vector<vector<int>> fixing(set<string> BPI) {
+    vector<vector<int>> MPI;
+    for (auto i = BPI.begin(); i != BPI.end(); i++) {
+        set<string> t;
+        vector<string> p;
+        vector<int> x;
+        padUnderscores(*i, t);
+        p.assign(t.begin(), t.end());
+        x = binaryToDecimal(p);
+        MPI.push_back(x);
+    }
+    return MPI;
+}
+
 set<string> translateCombined(set<string> combined, set<char> vars) {
     string Implicant;
     set<string> translated;
@@ -670,17 +697,16 @@ set<string> translateCombined(set<string> combined, set<char> vars) {
     return translated;
 }
 
-
-
-
-void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<char> vars, string f) {
+void Part4(vector<vector<int>> Mcombinations, set<string> Bcombinations, set<char> vars, string f) {
     map<int, int> minCount;
     map<int, vector<string>> PIBin;
     map<int, vector<vector<int>>> PIMin;
     for (int i = 0; i < Mcombinations.size(); i++) {
         for (int j = 0; j < Mcombinations[i].size(); j++) {
+            auto it = Bcombinations.begin();
             minCount[Mcombinations[i][j]]++;
-            PIBin[Mcombinations[i][j]].push_back(Bcombinations[i]);
+            advance(it, i);
+            PIBin[Mcombinations[i][j]].push_back(*it);
             PIMin[Mcombinations[i][j]].push_back(Mcombinations[i]);
         }
     }
@@ -717,7 +743,6 @@ void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<
     }
 }
 
-
 int main()
 {
     int i = 0;
@@ -739,14 +764,16 @@ int main()
         vector<int> M = Get_Minterms(func, num, vars);
         vector<string> B = Get_Binary_Min_Max(M, TT, 0);
         set<string> PI = QMStep1(B, vars, not_combined, PIset);
-        translateCombined(PI, vars);
-        // Part4({ {6,7}, {1,3,5,7} }, { "11_", "__1" }, { 'a','b','c' }, "ab+c");
+        vector<vector<int>> MPI = fixing(PI);
+        for (int i = 0; i < MPI.size(); i++) {
+            for (int j = 0; j < MPI[i].size(); j++) {
+                cout << MPI[i][j] << " ";
+            }
+        }
+        cout << endl;
+        Part4(MPI,PI, vars, func);
 
         cout << " pls " << endl;
-
-        //test = generateMinterms(PI);
-        //printset(test);
-
 
         cout << "\nTEST END" << endl;
     }
