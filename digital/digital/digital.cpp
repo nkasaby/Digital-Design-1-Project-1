@@ -463,11 +463,27 @@ void printset(set<T> s) {
         cout << *i << " ";
 }
 
+vector<int> binaryToDecimal(vector<string> binary_numbers) {
+    vector<int> decimal_numbers;
+    for (string binary_number : binary_numbers) {
+        int decimal_number = 0;
+        for (int i = 0; i < binary_number.length(); i++) {
+            decimal_number += (binary_number[i] - '0') * pow(2, binary_number.length() - i - 1);
+        }
+        decimal_numbers.push_back(decimal_number);
+    }
+    return decimal_numbers;
+}
+
+    
 vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variables_list, vector<string>& combined, vector<string>& notcombined, vector<string>& joined, set<string> not_comb_set)
 {
     int numvar = variables_list.size();
     int difference = 0;
     string new_term = "";
+    vector <string> mins;
+    vector <int> mins_dec;
+
 
     for (int i = 0; i < v.size(); i++)
     {
@@ -504,6 +520,8 @@ vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variabl
                 combined.push_back(new_term);
                 joined.push_back(v[i]);
                 joined.push_back(w[j]);
+                mins.push_back(v[i]);
+                mins.push_back(w[j]);
             }
 
             new_term = "";
@@ -522,6 +540,34 @@ vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variabl
             }
         }
     }
+
+
+    set<string> n, c, j;
+    unsigned sizen = notcombined.size(), sizec = combined.size(), sizej = joined.size();
+    for (unsigned i = 0; i < sizen; ++i) n.insert(notcombined[i]);
+    for (unsigned i = 0; i < sizec; ++i) c.insert(combined[i]);
+    for (unsigned i = 0; i < sizej; ++i) j.insert(joined[i]);
+    notcombined.assign(n.begin(), n.end());
+    combined.assign(c.begin(), c.end());
+    joined.assign(j.begin(), j.end());
+
+
+
+    mins_dec = binaryToDecimal(mins);
+
+    cout << endl;
+    int max = pow(2, numvar) - 1;
+    vector<int> final;
+    for (int i = 0; i < mins_dec.size(); i++) {
+        if (mins_dec[i] <= max)
+            final.push_back(mins_dec[i]);
+   
+    }
+    for (auto i = final.begin(); i !=final.end(); i++) {
+        cout <<*i << " ";
+    }
+    cout << endl;
+   // cout << "===========================================================================================" << endl;
 
     return combined;
 }
@@ -624,6 +670,9 @@ set<string> translateCombined(set<string> combined, set<char> vars) {
     return translated;
 }
 
+
+
+
 void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<char> vars, string f) {
     map<int, int> minCount;
     map<int, vector<string>> PIBin;
@@ -680,6 +729,8 @@ int main()
         vector<string> joined;
         set<string> PIset;
 
+        set<int> test;
+
         set<char> vars;
         func = reading_func(vars, original);
         int num = vars.size();
@@ -690,6 +741,12 @@ int main()
         set<string> PI = QMStep1(B, vars, not_combined, PIset);
         translateCombined(PI, vars);
         // Part4({ {6,7}, {1,3,5,7} }, { "11_", "__1" }, { 'a','b','c' }, "ab+c");
+
+        cout << " pls " << endl;
+
+        //test = generateMinterms(PI);
+        //printset(test);
+
 
         cout << "\nTEST END" << endl;
     }
