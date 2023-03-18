@@ -15,6 +15,7 @@ using namespace std;
 
 bool validate_alpha(string& str, int n);
 string Remove_Spaces(string str);
+string Remove_Repetitions(string str, set<char> variable_list);
 string reading_func(set<char>& vars, string& original);
 set<char> variables(string str);
 void print_variable_set(string str);
@@ -27,13 +28,19 @@ template<typename T>
 void swap(vector<T>& v, int a, int b);
 template<typename T>
 void print(vector<T> v);
+template<typename T>
+void printset(set<T> s);
+vector<int> binaryToDecimal(vector<string> binary_numbers);
+vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variables_list, vector<string>& combined, vector<string>& notcombined, vector<string>& joined);
 set<string> QMStep1(vector<string> minterms, set<char> variables_list, vector<string> not_combined, set<string> PI_set);
+void padUnderscores(string binary, set<string>& pad);
+vector<vector<int>> fixing(set<string> BPI);
 set<string> translateCombined(set<string> combined, set<char> vars);
-void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<char> vars, string f);
+void Part4(vector<vector<int>> Mcombinations, set<string> Bcombinations, set<char> vars, string f);
 
-bool validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
+bool validate_alpha(string& str, int n)                 
 {
-    bool SOP = true;                                     // ** need to make sure that func doesnt have ' before a letter or end with a +
+    bool SOP = true;                                    
     for (int i = 0; i < n; i++) {
         if (!isalpha(str[0])) {
             SOP = false;
@@ -57,10 +64,8 @@ bool validate_alpha(string& str, int n)                    // validating the SoP
 
 
     }
-    if (SOP == true) {
-        cout << "SoP format" << endl;
+    if (SOP == true)
         return SOP;
-    }
     else
     {
         cout << "Invalid. Not in SoP format, please re-enter your function" << endl;
@@ -78,7 +83,6 @@ string Remove_Spaces(string str) {
 }
 
 string Remove_Repetitions(string str, set<char> variable_list) {
-    //Handling of repetitions
     string final = "";
     bool valid = true;
     vector<string> terms_vec;
@@ -116,9 +120,8 @@ string Remove_Repetitions(string str, set<char> variable_list) {
                 if (terms_vec[i][j + 1] == '\'')
                     valid = false;
             }
-            //end of first for loop
             if (!valid)
-                final = final.substr(0, final.length() - j); //-1??
+                final = final.substr(0, final.length() - j);
         }
         if (valid)
             temp.push_back(final);
@@ -126,12 +129,6 @@ string Remove_Repetitions(string str, set<char> variable_list) {
 
     }
     final = "";
-    /*
-    cout << "printing" << endl;
-    for (int i = 0; i<temp.size(); i++) {
-        cout << temp[i] << endl;
-    }
-    */
     for (int i = 0; i < temp.size(); i++) {
         for (int j = 0; j < temp[i].size(); j++) {
             final += temp[i][j];
@@ -139,11 +136,10 @@ string Remove_Repetitions(string str, set<char> variable_list) {
         final += '+';
     }
     final = final.substr(0, final.length() - 1);
-
     return final;
 }
 
-string reading_func(set<char>& vars, string& original)                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
+string reading_func(set<char>& vars, string& original)                         
 {
     string func;
     bool valid = false;
@@ -163,16 +159,16 @@ string reading_func(set<char>& vars, string& original)                          
 
 set<char> variables(string str)
 {
-    set<char> variable;              //using an unordered set to store unique letters, this will help us know how many vairables we have in the function
+    set<char> variable;            
     for (int i = 0; i < str.size(); i++)
     {
-        if (isalpha(str[i]))               //inserting characters into the set only if they are letters (not + or ')
+        if (isalpha(str[i]))              
             variable.insert(str[i]);
     }
     return variable;
 }
 
-void print_variable_set(string str)            //will probably use to print out the truth tables
+void print_variable_set(string str)       
 {
     set<char> variable;
     for (int i = 0; i < str.size(); i++)
@@ -187,26 +183,20 @@ void print_variable_set(string str)            //will probably use to print out 
 
 vector<char> dec_to_binary(int n, string str)
 {
-
     vector <char> binary;
     int rows = pow(2, variables(str).size());
     int cols = variables(str).size() + 1;
     for (int i = cols - 2; i >= 0; i--) {
         int k = n >> i;
         if (k & 1)
-        {
             binary.push_back('1');
-        }
         else
-        {
             binary.push_back('0');
-        }
-
     }
     return binary;
 }
 
-vector<string>input_fix_up(string str, set<char> variable_list) { //ensures each term is represented with all literals
+vector<string>input_fix_up(string str, set<char> variable_list) { 
     vector<string> terms_vec;
     string term = "";
     for (int i = 0; i < str.size(); i++) {
@@ -230,67 +220,35 @@ vector<string>input_fix_up(string str, set<char> variable_list) { //ensures each
             }
         }
     }
-    //Testing
-    /*
-    for (int i = 0; i < terms_vec.size(); i++) {
-        cout << terms_vec[i] << endl;
-    }
-    cout << terms_vec.size();
-    */
-
-
-
     return terms_vec;
-
 }
 
-vector<int> Get_Minterms(string str, int num_of_variables, set<char> variables_list) { //returns vector of int resembling minterms
+vector<int> Get_Minterms(string str, int num_of_variables, set<char> variables_list) { 
 
     vector<string> terms_vec;
     terms_vec = input_fix_up(str, variables_list);
-
-    /* cout << "each term: " << endl;
-     for (int i = 0; i < terms_vec.size(); i++) {
-         cout << terms_vec[i] << endl;
-     }
-     */
     set<char>::iterator it = variables_list.begin();
     int y;
     vector<int> Minterms;
     int sum, count;
     for (int i = 0; i < terms_vec.size(); i++) {
         sum = 0;
-
-
         for (int j = 0; j < terms_vec[i].size(); j++) {
-
             if (terms_vec[i][j + 1] == '\'')
                 j++;
             else
             {
                 char x = terms_vec[i][j];
-
                 y = distance(variables_list.begin(), find(variables_list.begin(), variables_list.end(), x));
-
-
                 sum += pow(2, (num_of_variables - int(y) - 1));
-            }   //mariam did this
-
-
+            } 
         }
         Minterms.push_back(sum);
     }
-    /*
-    cout << "Minterms: " << endl;
-  for (int i = 0; i < Minterms.size(); i++) {
-      cout << Minterms[i] << endl;
-  }
-  */
-
     return Minterms;
 }
 
-vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type) { //type 0 returns binary vector of minterms and type 1 of maxterms
+vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type) {
     string term = "";
     vector<string>Binary_Terms;
     if (type == 0) {
@@ -315,25 +273,14 @@ vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int typ
             term = "";
         }
     }
-    /*
-    for (int i = 0; i < Binary_Terms.size(); i++) {
-        cout << Binary_Terms[i] << endl;
-    }
-    */
     return Binary_Terms;
-
 }
 
-void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>TT) {
-
+void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>TT) 
+{
     vector<string> Minterms = Get_Binary_Min_Max(M, TT, 0);
     vector<string> Maxterms = Get_Binary_Min_Max(M, TT, 1);
-    /* for (int i = 0; i < Minterms.size(); i++) {
-         cout << Minterms[i] << endl;
-     }
-     */
     string canonical = "";
-    //Sop
     char literal;
     set<char>::iterator it = variables_list.begin();
     bool added = false;
@@ -379,8 +326,6 @@ void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>
     }
     canonical = canonical.substr(0, canonical.length() - 1);
     cout << "Canonical Pos form: " << canonical << endl;
-
-
 }
 
 vector<vector<char>> generate_TT(int num, string str, set<char> variables_list, string original)
@@ -394,49 +339,26 @@ vector<vector<char>> generate_TT(int num, string str, set<char> variables_list, 
 
     vector<int>M;
     cout << endl;
-    //Obtaining Minterms 
     if (str != "")
         M = Get_Minterms(str, num, variables_list);
-
-
-    //for (int i = 0; i < M.size(); i++) {
-    //      cout << M[i] << " ";
-    //  }
-    //  cout << "hi" << endl;
-
-      //for (int i = 0; i < rows; i++) //initializing to zero
-      //{
-      //    for (int j = 0; j < rows; j++)
-      //    {
-      //        TT[i].push_back('0');
-      //    }
-      //}
-
     for (int i = 0; i < rows; i++)
     {
         bin = dec_to_binary(i, original);
         for (int j = 0; j < cols; j++)
-
         {
             if (j == cols - 1) {
 
-                if (find(M.begin(), M.end(), i) != M.end()) {
+                if (find(M.begin(), M.end(), i) != M.end())
                     TT[i].push_back('1');
-                }
                 else
                     TT[i].push_back('0');
-
-
             }
             else
                 TT[i].push_back(bin[j]);
-
             cout << TT[i][j] << " ";
         }
         cout << endl;
     }
-
-
     Print_Sop_Pos(variables_list, M, TT);
 
     return TT;
@@ -450,11 +372,9 @@ void swap(vector<T>& v, int a, int b) {
 }
 
 template<typename T>
-
 void print(vector<T> v) {
-    for (int i = 0; i < v.size(); i++) {
+    for (int i = 0; i < v.size(); i++)
         cout << v[i] << endl;
-    }
 }
 
 template<typename T>
@@ -475,7 +395,7 @@ vector<int> binaryToDecimal(vector<string> binary_numbers) {
     return decimal_numbers;
 }
 
-vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variables_list, vector<string>& combined, vector<string>& notcombined, vector<string>& joined, set<string> not_comb_set)
+vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variables_list, vector<string>& combined, vector<string>& notcombined, vector<string>& joined)
 {
     int numvar = variables_list.size();
     int difference = 0;
@@ -483,29 +403,19 @@ vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variabl
     vector <string> mins;
     vector <int> mins_dec;
 
-
     for (int i = 0; i < v.size(); i++)
     {
         for (int j = 0; j < w.size(); j++)
         {
             for (int k = 0; k < numvar; k++)
-            {
                 if (v[i].at(k) != w[j].at(k))
-                {
                     difference++;
-                }
-            }
             for (int k = 0; k < numvar; k++)
             {
                 if (difference == 1 && v[i].at(k) != w[j].at(k))
-                {
                     new_term += "_";
-                }
                 else if (difference == 1 && v[i].at(k) == w[j].at(k))
-                {
                     new_term += v[i].at(k);
-                }
-
             }
 
             if (difference != 1)
@@ -522,23 +432,15 @@ vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variabl
                 mins.push_back(v[i]);
                 mins.push_back(w[j]);
             }
-
             new_term = "";
             difference = 0;
         }
-
     }
 
     for (int i = 0; i < notcombined.size(); i++)
-    {
         for (int j = 0; j < joined.size(); j++)
-        {
             if (notcombined[i] == joined[j])
-            {
                 notcombined[i].erase();
-            }
-        }
-    }
 
 
     set<string> n, c, j;
@@ -550,29 +452,10 @@ vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variabl
     combined.assign(c.begin(), c.end());
     joined.assign(j.begin(), j.end());
 
-
-
-    //mins_dec = binaryToDecimal(mins);
-
-    //cout << endl;
-    //int max = pow(2, numvar) - 1;
-    //vector<int> final;
-    //for (int i = 0; i < mins_dec.size(); i++) {
-    //    if (mins_dec[i] <= max)
-    //        final.push_back(mins_dec[i]);
-
-    //}
-    //for (auto i = final.begin(); i != final.end(); i++) {
-    //    cout << *i << " ";
-    //}
-    //cout << endl;
-    //// cout << "===========================================================================================" << endl;
-
     return combined;
 }
 
 set<string> QMStep1(vector<string> minterms, set<char> variables_list, vector<string> not_combined, set<string> PI_set) {
-
     vector <string> str;
     vector<string> joined;
     vector<string> combined;
@@ -622,7 +505,7 @@ set<string> QMStep1(vector<string> minterms, set<char> variables_list, vector<st
 
             {
                 if (it1->first == it2->first - 1)
-                    str = compare_vec(it1->second, it2->second, variables_list, combined, not_combined, joined, PI_set);
+                    str = compare_vec(it1->second, it2->second, variables_list, combined, not_combined, joined);
             }
         }
     }
@@ -733,13 +616,13 @@ void Part4(vector<vector<int>> Mcombinations, set<string> Bcombinations, set<cha
 
     essentials = translateCombined(essentials, vars);
 
-    cout << "Essentials: \n";
+    cout << "Essentials: ";
     for (auto i = essentials.begin(); i != essentials.end(); i++) {
-        cout << *i << endl;
+        cout << *i << " ";
     }
-    cout << "\nNot Covered: \n";
+    cout << "\nNot Covered: ";
     for (auto i = notCovered.begin(); i != notCovered.end(); i++) {
-        cout << *i << endl;
+        cout << *i << " ";
     }
 }
 
@@ -747,7 +630,7 @@ int main()
 {
     int i = 0;
     while (true) {
-        cout << "TEST: " << ++i << endl;
+        cout << "\n\nTEST: " << ++i << endl;
         string func;
         string original;
         vector<string> not_combined;
@@ -765,17 +648,15 @@ int main()
         vector<string> B = Get_Binary_Min_Max(M, TT, 0);
         set<string> PI = QMStep1(B, vars, not_combined, PIset);
         vector<vector<int>> MPI = fixing(PI);
+        cout << "Minterm Combinations: ";
         for (int i = 0; i < MPI.size(); i++) {
             for (int j = 0; j < MPI[i].size(); j++) {
                 cout << MPI[i][j] << " ";
             }
+            cout << "    ";
         }
         cout << endl;
         Part4(MPI,PI, vars, func);
-
-        cout << " pls " << endl;
-
-        cout << "\nTEST END" << endl;
     }
     return 0;
 }
