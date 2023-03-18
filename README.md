@@ -55,7 +55,6 @@ To maintain SoP format every literal in the same term are put consecutively to r
 The same procedure is repeated for the maxterms with the only differences being the parameters of the function Get_Binary_Min_Max to obtain the maxterms and the manipulation of the literals. For PoS, if the digit is 1 then it is translated to the literal followed by a ‘\’’ for negation, if the digit is 0 then it is translated to the literal . Every literal in the same term is separated from the next by a ‘+’ and every term (sum) is bracketed to resemble the product of sums.
 The strings of SoP and Pos are then outputted.
 
-[25 Points] Generate and print all prime implicants (PIs). For each PI show the minterms it covers as well as its binary representation.
 
 In this step, we created the Quine-McCluskey algorithm to generate the prime implicants of a given function. We used 2 main functions to generate the prime implicants and show the minterms they cover. 
 Generating and printing the prime implicants:
