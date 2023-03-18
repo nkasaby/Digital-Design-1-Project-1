@@ -103,8 +103,11 @@ string Remove_Repetitions(string str, set<char> variable_list) {
             frequency[*it] = 0;
         }
         for (int j = 0; j < terms_vec[i].size(); j++) {
-            if(terms_vec[i][j] == '\'')
+            if (terms_vec[i][j] == '\'' && terms_vec[i][j + 1] != '\'')
                 final += terms_vec[i][j];
+            else if (terms_vec[i][j] == '\'' && terms_vec[i][j + 1] == '\'')
+                j += 2;
+
             if (frequency[terms_vec[i][j]] == 0) {
                 final += terms_vec[i][j];
                 frequency[terms_vec[i][j]]++;
@@ -654,7 +657,7 @@ void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<
     }
 
     essentials = translateCombined(essentials, vars);
-    
+
     cout << "Essentials: \n";
     for (auto i = essentials.begin(); i != essentials.end(); i++) {
         cout << *i << endl;
