@@ -13,25 +13,23 @@
 #include <map>
 using namespace std;
 
-
 bool validate_alpha(string& str, int n);
 string Remove_Spaces(string str);
-string reading_func();
+string reading_func(set<char>& vars, string& original);
 set<char> variables(string str);
 void print_variable_set(string str);
 vector<char> dec_to_binary(int n, string str);
 vector<string>input_fix_up(string str, set<char> variable_list);
 vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int type);
 void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>TT);
-vector<vector<char>> generate_TT(int num, string str, set<char> variables_list);
+vector<vector<char>> generate_TT(int num, string str, set<char> variables_list, string original);
 template<typename T>
 void swap(vector<T>& v, int a, int b);
 template<typename T>
 void print(vector<T> v);
 set<string> QMStep1(vector<string> minterms, set<char> variables_list, vector<string> not_combined, set<string> PI_set);
 set<string> translateCombined(set<string> combined, set<char> vars);
-void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<char> vars);
-
+void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<char> vars, string f);
 
 bool validate_alpha(string& str, int n)                    // validating the SoP format only (makes sure function entry contains letters or ' or +) ASSUMING NO SPACES BETWEEN CHARACTERS
 {
@@ -105,6 +103,8 @@ string Remove_Repetitions(string str, set<char> variable_list) {
             frequency[*it] = 0;
         }
         for (int j = 0; j < terms_vec[i].size(); j++) {
+            if(terms_vec[i][j] == '\'')
+                final += terms_vec[i][j];
             if (frequency[terms_vec[i][j]] == 0) {
                 final += terms_vec[i][j];
                 frequency[terms_vec[i][j]]++;
@@ -140,7 +140,7 @@ string Remove_Repetitions(string str, set<char> variable_list) {
     return final;
 }
 
-string reading_func()                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
+string reading_func(set<char>& vars, string& original)                            //very basic function that takes SOP function from user and validates it ONLY. (will be improved later)
 {
     string func;
     bool valid = false;
@@ -150,10 +150,11 @@ string reading_func()                            //very basic function that take
         int n = func.size();
         valid = validate_alpha(func, n);
     }
-
-    func = Remove_Spaces(func);
-    func = Remove_Repetitions(func, variables(func));
     transform(func.begin(), func.end(), func.begin(), ::tolower);
+    original = func;
+    vars = variables(func);
+    func = Remove_Spaces(func);
+    func = Remove_Repetitions(func, vars);
     return func;
 }
 
@@ -295,7 +296,7 @@ vector<string> Get_Binary_Min_Max(vector<int> M, vector<vector<char>>TT, int typ
                 if (find(M.begin(), M.end(), i) != M.end())
                     term += TT[i][j];
             }
-            if(term != "")
+            if (term != "")
                 Binary_Terms.push_back(term);
             term = "";
         }
@@ -379,24 +380,38 @@ void Print_Sop_Pos(set<char> variables_list, vector<int> M, vector<vector<char>>
 
 }
 
-vector<vector<char>> generate_TT(int num, string str, set<char> variables_list)
+vector<vector<char>> generate_TT(int num, string str, set<char> variables_list, string original)
 {
-    print_variable_set(str);
-    cout << str;
-    int rows = pow(2, variables(str).size());
-    int cols = variables(str).size() + 1;
+    print_variable_set(original);
+    cout << original;
+    int rows = pow(2, variables_list.size());
+    int cols = variables_list.size() + 1;
     vector < vector<char>> TT(rows);
     vector<char> bin;
 
     vector<int>M;
     cout << endl;
     //Obtaining Minterms 
-    M = Get_Minterms(str, num, variables_list);
+    if (str != "")
+        M = Get_Minterms(str, num, variables_list);
 
+
+    //for (int i = 0; i < M.size(); i++) {
+    //      cout << M[i] << " ";
+    //  }
+    //  cout << "hi" << endl;
+
+      //for (int i = 0; i < rows; i++) //initializing to zero
+      //{
+      //    for (int j = 0; j < rows; j++)
+      //    {
+      //        TT[i].push_back('0');
+      //    }
+      //}
 
     for (int i = 0; i < rows; i++)
     {
-        bin = dec_to_binary(i, str);
+        bin = dec_to_binary(i, original);
         for (int j = 0; j < cols; j++)
 
         {
@@ -405,9 +420,10 @@ vector<vector<char>> generate_TT(int num, string str, set<char> variables_list)
                 if (find(M.begin(), M.end(), i) != M.end()) {
                     TT[i].push_back('1');
                 }
-
                 else
                     TT[i].push_back('0');
+
+
             }
             else
                 TT[i].push_back(bin[j]);
@@ -416,6 +432,7 @@ vector<vector<char>> generate_TT(int num, string str, set<char> variables_list)
         }
         cout << endl;
     }
+
 
     Print_Sop_Pos(variables_list, M, TT);
 
@@ -435,6 +452,12 @@ void print(vector<T> v) {
     for (int i = 0; i < v.size(); i++) {
         cout << v[i] << endl;
     }
+}
+
+template<typename T>
+void printset(set<T> s) {
+    for (auto i = s.begin(); i != s.end(); i++)
+        cout << *i << " ";
 }
 
 vector<string> compare_vec(vector<string> v, vector<string> w, set<char> variables_list, vector<string>& combined, vector<string>& notcombined, vector<string>& joined, set<string> not_comb_set)
@@ -540,10 +563,10 @@ set<string> QMStep1(vector<string> minterms, set<char> variables_list, vector<st
         }
 
         for (int i = 0; i < not_combined.size(); i++)
-        {
             PI_set.insert(not_combined[i]);
-        }
-
+        cout << "Prime Implicants (Binary): ";
+        printset(PI_set);
+        cout << endl;
         return PI_set;
     }
     for (auto it1 = groups.begin(); it1 != groups.end(); ++it1) {                              //loops to access value elements of the map
@@ -557,9 +580,10 @@ set<string> QMStep1(vector<string> minterms, set<char> variables_list, vector<st
     }
     if (combined.size() == 0) {
         for (int i = 0; i < not_combined.size(); i++)
-        {
             PI_set.insert(not_combined[i]);
-        }
+        cout << "Prime Implicants (Binary): ";
+        printset(PI_set);
+        cout << endl;
         return PI_set;
     }
 
@@ -589,70 +613,82 @@ set<string> translateCombined(set<string> combined, set<char> vars) {
         translated.insert(Implicant);
     }
 
+    cout << "Prime Implicants (Literals): ";
     for (auto i = translated.begin(); i != translated.end(); i++)
-    {
         cout << *i << " ";
-    }
     cout << endl;
 
     return translated;
 }
 
-void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<char> vars) {
-    map<int, int> smthn;
-    map<int, vector<string>> things;
+void Part4(vector<vector<int>> Mcombinations, vector<string> Bcombinations, set<char> vars, string f) {
+    map<int, int> minCount;
+    map<int, vector<string>> PIBin;
+    map<int, vector<vector<int>>> PIMin;
     for (int i = 0; i < Mcombinations.size(); i++) {
         for (int j = 0; j < Mcombinations[i].size(); j++) {
-            smthn[Mcombinations[i][j]]++;
-            things[Mcombinations[i][j]].push_back(Bcombinations[i]);
+            minCount[Mcombinations[i][j]]++;
+            PIBin[Mcombinations[i][j]].push_back(Bcombinations[i]);
+            PIMin[Mcombinations[i][j]].push_back(Mcombinations[i]);
         }
     }
 
     set<string> essentials;
-    set<string> nonEssentials;
+    set<int> essentialMin;
+    set<int> notCovered;
+    vector<int> m = Get_Minterms(f, vars.size(), vars);
 
-    for (auto i : smthn) {
+    for (auto i : minCount) {
         if (i.second == 1) {
-            essentials.insert(things[i.first][0]);
+            essentials.insert(PIBin[i.first][0]);
+            for (int j = 0; j < PIMin[i.first][0].size(); j++) {
+                essentialMin.insert(PIMin[i.first][0][j]);
+            }
         }
     }
 
-    for (int i = 0; i < Bcombinations.size(); i++) {
-        if (essentials.find(Bcombinations[i]) == essentials.end())
-            nonEssentials.insert(Bcombinations[i]);
+    for (int x = 0; x < m.size(); x++) {
+        if (essentialMin.find(m[x]) == essentialMin.end()) {
+            notCovered.insert(m[x]);
+        }
     }
 
     essentials = translateCombined(essentials, vars);
-    nonEssentials = translateCombined(nonEssentials, vars);
-
-
+    
     cout << "Essentials: \n";
     for (auto i = essentials.begin(); i != essentials.end(); i++) {
         cout << *i << endl;
     }
-    /*cout << "\nNon-Essentials: \n";
-    for (auto i = nonEssentials.begin(); i != nonEssentials.end(); i++) {
+    cout << "\nNot Covered: \n";
+    for (auto i = notCovered.begin(); i != notCovered.end(); i++) {
         cout << *i << endl;
-    }*/
+    }
 }
-
 
 
 int main()
 {
-     string func;
-     vector<string> not_combined;
-     vector<string> joined;
-     set<string> PIset;
+    int i = 0;
+    while (true) {
+        cout << "TEST: " << ++i << endl;
+        string func;
+        string original;
+        vector<string> not_combined;
+        vector<string> joined;
+        set<string> PIset;
 
-      func = reading_func();     
-      set<char> vars = variables(func);
-      int num = vars.size();
-      cout << endl;     //test
+        set<char> vars;
+        func = reading_func(vars, original);
+        int num = vars.size();
 
-      vector<vector<char>> TT = generate_TT(num, func, vars);
-      vector<int> M = Get_Minterms(func, num, vars);
-      vector<string> B = Get_Binary_Min_Max(M, TT, 0);
-      set<string> PI = QMStep1(B, vars, not_combined, PIset);
-      translateCombined(PI, vars);
+        vector<vector<char>> TT = generate_TT(num, func, vars, original);
+        vector<int> M = Get_Minterms(func, num, vars);
+        vector<string> B = Get_Binary_Min_Max(M, TT, 0);
+        set<string> PI = QMStep1(B, vars, not_combined, PIset);
+        translateCombined(PI, vars);
+        // Part4({ {6,7}, {1,3,5,7} }, { "11_", "__1" }, { 'a','b','c' }, "ab+c");
+
+        cout << "\nTEST END" << endl;
+    }
+    return 0;
 }
